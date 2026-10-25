@@ -1,0 +1,80 @@
+name: release
+
+# Manual only: Actions tab -> release -> Run workflow (or `gh workflow run release.yml -f version=v0.1.0`).
+# Builds Windows and macOS packages from the selected branch, creates the tag and publishes the release.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --release
+      - run: cargo build --release
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/MyTracker | Out-Null
+          Copy-Item target/release/mytracker.exe dist/MyTracker/MyTracker.exe
+          Copy-Item README.md dist/MyTracker/
+          Compress-Archive -Path dist/MyTracker -DestinationPath dist/MyTracker-${{ inputs.version }}-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*.zip
+
+  macos:
+    runs-on: macos-latest  # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --release
+      - run: cargo build --release
+      - name: Package app bundle
+        run: |
+          VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          APP=dist/MyTracker.app
+          mkdir -p "$APP/Contents/MacOS"
+          cp target/release/mytracker "$APP/Contents/MacOS/mytracker"
+          sed "s/VERSION/$VERSION/g" packaging/macos/Info.plist > "$APP/Contents/Info.plist"
+          codesign --force --deep --sign - "$APP"
+          ditto -c -k --keepParent "$APP" "dist/MyTracker-${{ inputs.version }}-macos-arm64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/*.zip
+
+  publish:
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: MyTracker ${{ inputs.version }}
+          files: dist/*.zip
+          generate_release_notes: true
+          body: |
+            Webcam head tracker for DCS and other sims (opentrack UDP and FreeTrack/TrackIR output).
+
+            **Windows:** unzip and run `MyTracker.exe`. For DCS without opentrack running, install opentrack (for its NPClient64.dll) and enable *FreeTrack / TrackIR* in the Output section.
+
+            **macOS (Apple Silicon):** unzip and move `MyTracker.app` to Applications. The app is not notarized, so the first time, right-click it and choose *Open* (or run `xattr -dr com.apple.quarantine MyTracker.app`).
+
+            See the README for setup details.

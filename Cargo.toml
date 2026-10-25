@@ -1,0 +1,40 @@
+[package]
+name = "mytracker"
+version = "0.1.0"
+edition = "2021"
+description = "Webcam head tracker for DCS and other sims (opentrack UDP / FreeTrack output)"
+license = "LGPL-3.0-or-later"
+
+[dependencies]
+anyhow = "1"
+log = "0.4"
+env_logger = "0.11"
+parking_lot = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+directories = "6"
+nalgebra = "0.34"
+ort = { version = "=2.0.0-rc.15", default-features = false, features = ["std", "download-binaries", "tls-native", "api-24"] }
+nokhwa = { version = "0.10.11", default-features = false, features = ["input-native"] }
+zune-jpeg = "0.4"
+zune-core = "0.4"
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "persistence"] }
+global-hotkey = "0.9"
+gilrs = "0.11"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Memory", "Win32_System_Threading", "Win32_Security"] }
+winreg = "0.55"
+
+[dev-dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

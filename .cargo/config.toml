@@ -1,0 +1,3 @@
+[env]
+# Matches the minimum macOS version of the prebuilt ONNX Runtime library.
+MACOSX_DEPLOYMENT_TARGET = "13.4"
