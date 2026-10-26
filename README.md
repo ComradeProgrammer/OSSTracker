@@ -1,5 +1,35 @@
 # MyTracker (Rust)
 
+
+一个开箱即用的头瞄软件 适配dcs和opentracker
+
+本tracker接受笔记本前置摄像头，不会对视频帧进行裁剪，在捕捉人脸动作之前先识别人脸,大角度扭头不会闪退，rust写的也不会内存泄漏。
+
+使用方法：去release页面下载windows的压缩包 解压缩之后 里面就一个x86 exe，开箱即用点击就行。**必须在启动dcs之前启动本软件**
+
+English below
+
+<img width="1440" height="1080" alt="v2-e7b8568184825dba85e019ba47f871b7_r" src="https://github.com/user-attachments/assets/2cbe0359-11c4-4c70-9ad3-401cc975478f" />
+
+## 前言
+
+Deepseek圆了我的飞行梦<br/>
+一个VR的价格是，2千5百块 (quest3s)<br/>
+一个头瞄的价格是，1千5百块<br/>
+而一个摄像头 30块；DCS的苏25T 不要钱<br/>
+我想玩DCS 但是没有头瞄也没有VR<br/>
+于是跟万能的deepseek说 我该怎么办?<br/>
+大肥鱼让我把摄像头打开,然后她去huggingface拉了俩模型，一个识别图片哪部分有脸，一个锁我脸. 她又用rust写了个纯视觉方案<br/>
+3个小时之后，火车从埃因霍温开回了阿姆斯特丹<br/>
+我回到家就开上了苏25T<br/>
+**玩的蛮开心 但是对CS这行的信心玩没了<br/>**
+**早晚得失业回国送外卖吧<br/>**
+
+*代码真是deepseek写的 contributor有claude是我让他后来搞定一下release pipeline*
+
+
+# MyTracker (Rust)
+
 A webcam head tracker for DCS World and other flight sims, for Windows and macOS.
 It outputs to **opentrack (UDP)** and, on Windows, directly to **FreeTrack/TrackIR** (what DCS reads).
 
